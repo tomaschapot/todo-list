@@ -10,6 +10,10 @@ export default class Task {
 
 	//Setting up the methods
 
+	completeTask() {
+		this.status = true;
+	}
+
 	setTitle(title) {
 		this.title = title;
 	}

@@ -113,6 +113,9 @@ header::after {
 	color: white;
 	transition: 0.2s;
 }
+.button-delete {
+	background-color: var(--color-gray);
+}
 .button:hover {
 	color: var(--color-black);
 	background-color: var(--color-font-white);
@@ -120,6 +123,10 @@ header::after {
 }
 .button:not(last-of-type) {
 	margin-right: 10px;
+}
+
+.create-delete-buttons {
+	margin-top: 15px;
 }
 /*Aside*/
 .fa-solid {
