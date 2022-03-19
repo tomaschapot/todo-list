@@ -61,7 +61,8 @@ class DOM {
 			}
 		});
 		tasksContainer.addEventListener("dragover", (event) => {
-			console.log("hola");
+			event.preventDefault();
+			DOM.createTaskDrag(event);
 		});
 	}
 
@@ -117,6 +118,40 @@ class DOM {
 			task.append(title, description, iconsContainer);
 			iconsContainer.append(proyectIcon, dateInput);
 			buttonsContainer.append(createButton, deleteButton);
+		}
+	}
+
+	static getDragAfterElement(container, y) {
+		const draggableItems = [
+			...container.querySelectorAll(".task-container:not(.dragging)"), //get all tasks except the one currently dragging
+		];
+
+		return draggableItems.reduce(
+			(closest, child) => {
+				const box = child.getBoundingClientRect(); //Rectangle and position of each task
+				const offset = y - box.top - box.height / 2;
+
+				if (offset < 0 && offset > closest.offset) {
+					return { offset: offset, element: child };
+				} else {
+					return closest;
+				}
+			},
+			{
+				offset: Number.NEGATIVE_INFINITY,
+			}
+		).element;
+	}
+	static createTaskDrag(event) {
+		const afterElement = DOM.getDragAfterElement(tasksContainer, event.clientY);
+
+		console.log(afterElement);
+
+		let draggable = document.querySelector(".dragging");
+		if (afterElement === undefined) {
+			tasksContainer.appendChild(draggable);
+		} else {
+			tasksContainer.insertBefore(draggable, afterElement);
 		}
 	}
 
