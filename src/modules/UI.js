@@ -33,6 +33,9 @@ class DOM {
 				DOM.changeStatusToPending(e);
 			}
 		});
+		tasksContainer.addEventListener("keydown", (e) => {
+			DOM.keyboardEvents(e);
+		});
 
 		tasksContainer.addEventListener("click", function (event) {
 			if (event.target.classList[1] == "button-delete") {
@@ -66,6 +69,20 @@ class DOM {
 		});
 	}
 
+	static keyboardEvents(e) {
+		if (
+			e.target.classList[0] === "task-textarea" ||
+			e.target.classList[0] === "task-input"
+		) {
+			if (e.code === "Enter") {
+				DOM.displayCreatedTask();
+				DOM.cancelTaskInput();
+			}
+			if (e.code === "Escape") {
+				DOM.cancelTaskInput();
+			}
+		}
+	}
 	static descriptionRandomizer() {
 		const descriptionOptions = [
 			"Work meeting till 11pm",
@@ -241,7 +258,7 @@ class DOM {
 		proyectIcon.classList.add("fa-solid", "fa-list-check");
 
 		//Append Elements
-		tasksContainer.appendChild(container);
+		tasksContainer.insertBefore(container, tasksContainer.firstChild);
 		container.appendChild(task);
 
 		task.append(titleContainer, iconsContainer);
