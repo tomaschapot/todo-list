@@ -44,7 +44,7 @@ class DOM {
 			}
 			if (event.target.classList[2] === "task-status") {
 				DOM.removeTask(event);
-				console.log(tasksContainer.childElementCount);
+
 				if (tasksContainer.childElementCount === 0) {
 					DOM.displayFirstAddButton();
 				}
@@ -66,6 +66,20 @@ class DOM {
 		});
 	}
 
+	static descriptionRandomizer() {
+		const descriptionOptions = [
+			"Work meeting till 11pm",
+			"Cook dinner for my friends",
+			"Clean up the pool",
+			"Buy new couch",
+			"Start my own company",
+			"Brush my teeth",
+		];
+
+		let randomIndex = Math.floor(Math.random() * descriptionOptions.length);
+		return descriptionOptions[randomIndex];
+	}
+
 	static displayFirstAddButton() {
 		$firstAddButton.style.display = "block";
 	}
@@ -84,7 +98,7 @@ class DOM {
 			task.classList.add("task");
 
 			let title = document.createElement("input");
-			title.placeholder = "Por ej. Reunion de Trabajo 11pm";
+			title.placeholder = DOM.descriptionRandomizer();
 			title.classList.add("task-input", "title-container", "task-resources");
 
 			let description = document.createElement("textarea");
@@ -113,7 +127,7 @@ class DOM {
 			deleteButton.classList.add("button", "button-delete");
 
 			//Append Elements
-			tasksContainer.appendChild(container);
+			tasksContainer.insertBefore(container, tasksContainer.firstChild);
 			container.append(task, buttonsContainer);
 			task.append(title, description, iconsContainer);
 			iconsContainer.append(proyectIcon, dateInput);
@@ -145,8 +159,6 @@ class DOM {
 	static createTaskDrag(event) {
 		const afterElement = DOM.getDragAfterElement(tasksContainer, event.clientY);
 
-		console.log(afterElement);
-
 		let draggable = document.querySelector(".dragging");
 		if (afterElement === undefined) {
 			tasksContainer.appendChild(draggable);
@@ -159,6 +171,7 @@ class DOM {
 		let taskInput = tasksContainer.querySelector("#task-input");
 		if (taskInput !== null) {
 			taskInput.remove();
+			DOM.displayFirstAddButton();
 		}
 	}
 
@@ -171,7 +184,7 @@ class DOM {
 
 	static removeTask(e) {
 		let currentTaskContainer = e.target.closest(".task-container");
-		let currentTask = e.target.closest(".task");
+		let currentTask = e.target.closest(".task-created");
 		let currentTaskTitle = currentTask.querySelector(".task-title").textContent;
 
 		currentTaskContainer.remove();
@@ -203,7 +216,7 @@ class DOM {
 		container.id = Date.now();
 
 		let task = document.createElement("div");
-		task.classList.add("task");
+		task.classList.add("task-created");
 
 		let titleContainer = document.createElement("div");
 		titleContainer.classList.add("title-container", "task-resources");
@@ -231,8 +244,8 @@ class DOM {
 		tasksContainer.appendChild(container);
 		container.appendChild(task);
 
-		task.append(titleContainer, description, iconsContainer);
-		titleContainer.append(statusIcon, title);
+		task.append(titleContainer, iconsContainer);
+		titleContainer.append(statusIcon, title, description);
 		iconsContainer.append(proyectIcon, dateIcon);
 	}
 	static changeStatusToCompleted(e) {
