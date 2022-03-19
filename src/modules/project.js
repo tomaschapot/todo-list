@@ -1,7 +1,7 @@
 export default class Project {
-	constructor(title, category) {
+	constructor(title) {
 		this.title = title;
-		this.category = category;
+
 		this.tasks = []; // Empty array to push the tasks on
 	}
 
@@ -34,20 +34,16 @@ export default class Project {
 		}
 	}
 
-	deleteTask(task) {
-		if (this.tasks.includes(task)) {
-			let index = this.tasks.indexOf(task);
-			this.tasks.splice(index, 1);
-		}
+	deleteTask(taskToRemove) {
+		this.tasks.forEach((task) => {
+			let count = 0;
+			if (task.title === taskToRemove) {
+				this.tasks.splice(count, 1);
+			}
+			count += 1;
+		});
 	}
-}
-
-//Task Formatter
-
-function capitalizeTask(task) {
-	let lowerCaseTask = task.toLowerCase();
-	let capitalizedTask =
-		lowerCaseTask.charAt(0).toUpperCase() + lowerCaseTask.slice(1);
-
-	return capitalizedTask;
+	clearAllTasks() {
+		this.tasks = [];
+	}
 }

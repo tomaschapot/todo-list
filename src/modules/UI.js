@@ -4,9 +4,73 @@ import Project from "./Project.js";
 const $addTask = document.querySelector("#add-task");
 const $clearAll = document.querySelector("#clear-task");
 const tasksContainer = document.querySelector(".project-grid");
-let defaultProject = new Project("default", "default");
+const $firstAddButton = document.querySelector("#add-button");
+let defaultProject = new Project("Default");
+let completedTasks = new Project("Completed");
 
 class DOM {
+	static initializeEventListeners() {
+		$addTask.addEventListener("click", () => {
+			DOM.createTaskInput();
+			DOM.removeFirstAddButton();
+		});
+		$clearAll.addEventListener("click", () => {
+			DOM.removeAllTasks();
+			DOM.displayFirstAddButton();
+		});
+		$firstAddButton.addEventListener("click", () => {
+			DOM.createTaskInput();
+			DOM.removeFirstAddButton();
+		});
+		//Event Delegation for Dynamically Generated Elements
+		tasksContainer.addEventListener("mouseover", function (e) {
+			if (e.target.classList[2] === "task-status") {
+				DOM.changeStatusToCompleted(e);
+			}
+		});
+		tasksContainer.addEventListener("mouseout", function (e) {
+			if (e.target.classList[2] === "task-status") {
+				DOM.changeStatusToPending(e);
+			}
+		});
+
+		tasksContainer.addEventListener("click", function (event) {
+			if (event.target.classList[1] == "button-delete") {
+				DOM.cancelTaskInput();
+			}
+			if (event.target.classList[1] == "button-create") {
+				DOM.displayCreatedTask();
+				DOM.cancelTaskInput();
+			}
+			if (event.target.classList[2] === "task-status") {
+				DOM.removeTask(event);
+				console.log(tasksContainer.childElementCount);
+				if (tasksContainer.childElementCount === 0) {
+					DOM.displayFirstAddButton();
+				}
+			}
+		});
+		tasksContainer.addEventListener("dragstart", (event) => {
+			if ((event.target.draggable = "true")) {
+				event.target.classList.add("dragging");
+			}
+		});
+		tasksContainer.addEventListener("dragend", (event) => {
+			if ((event.target.draggable = "true")) {
+				event.target.classList.remove("dragging");
+			}
+		});
+		tasksContainer.addEventListener("dragover", (event) => {
+			console.log("hola");
+		});
+	}
+
+	static displayFirstAddButton() {
+		$firstAddButton.style.display = "block";
+	}
+	static removeFirstAddButton() {
+		$firstAddButton.style.display = "none";
+	}
 	static createTaskInput() {
 		//Create Elements
 
@@ -23,14 +87,15 @@ class DOM {
 			title.classList.add("task-input", "title-container", "task-resources");
 
 			let description = document.createElement("textarea");
-			title.description = "Description";
+			description.placeholder = "Description";
 			description.classList.add("task-textarea");
 
 			let iconsContainer = document.createElement("div");
 			iconsContainer.classList.add("task-resources");
 
-			let dateIcon = document.createElement("i");
-			dateIcon.classList.add("fa-solid", "fa-calendar-days");
+			let dateInput = document.createElement("input");
+			dateInput.type = "date";
+			dateInput.classList.add("task-date");
 
 			let proyectIcon = document.createElement("i");
 			proyectIcon.classList.add("fa-solid", "fa-list-check");
@@ -50,10 +115,11 @@ class DOM {
 			tasksContainer.appendChild(container);
 			container.append(task, buttonsContainer);
 			task.append(title, description, iconsContainer);
-			iconsContainer.append(dateIcon, proyectIcon);
+			iconsContainer.append(proyectIcon, dateInput);
 			buttonsContainer.append(createButton, deleteButton);
 		}
 	}
+
 	static cancelTaskInput() {
 		let taskInput = tasksContainer.querySelector("#task-input");
 		if (taskInput !== null) {
@@ -65,28 +131,16 @@ class DOM {
 		while (tasksContainer.firstChild) {
 			tasksContainer.removeChild(tasksContainer.firstChild);
 		}
+		defaultProject.clearAllTasks();
 	}
+
 	static removeTask(e) {
+		let currentTaskContainer = e.target.closest(".task-container");
 		let currentTask = e.target.closest(".task");
-		currentTask.remove();
-	}
+		let currentTaskTitle = currentTask.querySelector(".task-title").textContent;
 
-	static initializeEventListeners() {
-		$addTask.addEventListener("click", DOM.createTaskInput);
-		$clearAll.addEventListener("click", DOM.removeAllTasks);
-
-		//Event Delegation for Dynamically Generated Elements
-
-		tasksContainer.addEventListener("click", function (event) {
-			if (event.target.classList[1] == "button-delete") {
-				DOM.cancelTaskInput();
-			}
-			if (event.target.classList[1] == "button-create") {
-				DOM.displayCreatedTask();
-				DOM.cancelTaskInput();
-			}
-			if (event.target.classList[2] === "task-status") DOM.removeTask(event);
-		});
+		currentTaskContainer.remove();
+		defaultProject.deleteTask(currentTaskTitle);
 	}
 
 	static createTaskfromInput() {
@@ -94,14 +148,24 @@ class DOM {
 		const titleValue = title.value;
 		const description = document.querySelector(".task-textarea");
 		const descriptionValue = description.value;
+		const dueDate = document.querySelector(".task-date");
+		const dueDateValue = dueDate.value;
+		let task = new Task(titleValue, descriptionValue, dueDateValue);
+		defaultProject.addTask(task);
 
-		return new Task(titleValue, descriptionValue);
+		return task;
+	}
+
+	static onDragStart(event) {
+		event.currentTarget.style.backgroundColor = "red";
 	}
 
 	static displayCreatedTask() {
 		let createdTask = DOM.createTaskfromInput();
 		let container = document.createElement("div");
 		container.classList.add("task-container");
+		container.draggable = "true";
+		container.id = Date.now();
 
 		let task = document.createElement("div");
 		task.classList.add("task");
@@ -121,8 +185,9 @@ class DOM {
 		let iconsContainer = document.createElement("div");
 		iconsContainer.classList.add("task-resources");
 
-		let dateIcon = document.createElement("i");
-		dateIcon.classList.add("fa-solid", "fa-calendar-days");
+		let dateIcon = document.createElement("p");
+		dateIcon.textContent = `Due Date: ${createdTask.getDueDate()}`;
+		dateIcon.classList.add("task-date");
 
 		let proyectIcon = document.createElement("i");
 		proyectIcon.classList.add("fa-solid", "fa-list-check");
@@ -133,7 +198,13 @@ class DOM {
 
 		task.append(titleContainer, description, iconsContainer);
 		titleContainer.append(statusIcon, title);
-		iconsContainer.append(dateIcon, proyectIcon);
+		iconsContainer.append(proyectIcon, dateIcon);
+	}
+	static changeStatusToCompleted(e) {
+		e.target.classList.replace("fa-circle", "fa-circle-check");
+	}
+	static changeStatusToPending(e) {
+		e.target.classList.replace("fa-circle-check", "fa-circle");
 	}
 }
 
