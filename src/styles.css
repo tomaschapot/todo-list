@@ -157,7 +157,12 @@ header::after {
 	width: 200px;
 	height: auto;
 }
-
+.main-title {
+	color: var(--color-accent-green);
+	font-size: 2.3rem;
+	margin-left: 38px;
+	margin-right: auto;
+}
 .title {
 	padding-right: 1rem;
 	font-size: 0.6rem;
@@ -367,9 +372,22 @@ li a {
 		padding-bottom: 20px;
 	}
 	.project-grid {
-		padding: 30px;
-		grid-template-columns: 1fr;
-		grid-template-rows: auto;
-		grid-auto-rows: 200px;
+		width: 95%;
+	}
+	.task-created {
+		background-color: var(--color-gray);
+		border-radius: 5px;
+		transition: 0.2s;
+		text-align: center;
+		display: flex;
+		flex-direction: column;
+		cursor: move;
+		justify-content: space-between;
+		padding: 1.5rem;
+	}
+	.title-container {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
 	}
 }

@@ -1,5 +1,6 @@
 import Task from "./Tasks.js";
 import Project from "./Project.js";
+import LocalStorage from "./Storage.js";
 
 const $addTask = document.querySelector("#add-task");
 const $clearAll = document.querySelector("#clear-task");
@@ -9,6 +10,14 @@ let defaultProject = new Project("Default");
 let completedTasks = new Project("Completed");
 
 class DOM {
+	static loadStorage() {
+		for (let i = 0; i < localStorage.length; i++) {
+			const key = localStorage.key(i);
+			const task = LocalStorage.getTask(key);
+
+			DOM.displayCreatedTask(task);
+		}
+	}
 	static initializeEventListeners() {
 		$addTask.addEventListener("click", () => {
 			DOM.createTaskInput();
@@ -42,7 +51,7 @@ class DOM {
 				DOM.cancelTaskInput();
 			}
 			if (event.target.classList[1] == "button-create") {
-				DOM.displayCreatedTask();
+				DOM.displayCreatedTask(DOM.createTaskfromInput());
 				DOM.cancelTaskInput();
 			}
 			if (event.target.classList[2] === "task-status") {
@@ -75,7 +84,7 @@ class DOM {
 			e.target.classList[0] === "task-input"
 		) {
 			if (e.code === "Enter") {
-				DOM.displayCreatedTask();
+				DOM.displayCreatedTask(DOM.createTaskfromInput());
 				DOM.cancelTaskInput();
 			}
 			if (e.code === "Escape") {
@@ -91,6 +100,9 @@ class DOM {
 			"Buy new couch",
 			"Start my own company",
 			"Brush my teeth",
+			"Create a new cooking recipe",
+			"Drive to New York",
+			"Have Dinner at 10pm",
 		];
 
 		let randomIndex = Math.floor(Math.random() * descriptionOptions.length);
@@ -188,7 +200,9 @@ class DOM {
 		let taskInput = tasksContainer.querySelector("#task-input");
 		if (taskInput !== null) {
 			taskInput.remove();
-			DOM.displayFirstAddButton();
+			if (tasksContainer.childElementCount === 0) {
+				DOM.displayFirstAddButton();
+			}
 		}
 	}
 
@@ -197,6 +211,7 @@ class DOM {
 			tasksContainer.removeChild(tasksContainer.firstChild);
 		}
 		defaultProject.clearAllTasks();
+		localStorage.clear();
 	}
 
 	static removeTask(e) {
@@ -206,6 +221,7 @@ class DOM {
 
 		currentTaskContainer.remove();
 		defaultProject.deleteTask(currentTaskTitle);
+		localStorage.removeItem(currentTaskTitle);
 	}
 
 	static createTaskfromInput() {
@@ -217,7 +233,7 @@ class DOM {
 		const dueDateValue = dueDate.value;
 		let task = new Task(titleValue, descriptionValue, dueDateValue);
 		defaultProject.addTask(task);
-
+		LocalStorage.setTask(task);
 		return task;
 	}
 
@@ -225,8 +241,8 @@ class DOM {
 		event.currentTarget.style.backgroundColor = "red";
 	}
 
-	static displayCreatedTask() {
-		let createdTask = DOM.createTaskfromInput();
+	static displayCreatedTask(inputTask) {
+		let createdTask = inputTask;
 		let container = document.createElement("div");
 		container.classList.add("task-container");
 		container.draggable = "true";
@@ -241,17 +257,17 @@ class DOM {
 		statusIcon.classList.add("fa-regular", "fa-circle", "task-status");
 		let title = document.createElement("h4");
 		title.classList.add("task-title");
-		title.textContent = createdTask.getTitle();
+		title.textContent = createdTask.title;
 
 		let description = document.createElement("p");
 		description.classList.add("task-desc");
-		description.textContent = createdTask.getDescription();
+		description.textContent = createdTask.description;
 
 		let iconsContainer = document.createElement("div");
 		iconsContainer.classList.add("task-resources");
 
 		let dateIcon = document.createElement("p");
-		dateIcon.textContent = `Due Date: ${createdTask.getDueDate()}`;
+		dateIcon.textContent = `Due Date: ${createdTask.dueDate}`;
 		dateIcon.classList.add("task-date");
 
 		let proyectIcon = document.createElement("i");
@@ -276,3 +292,4 @@ class DOM {
 //Event Listeners
 
 DOM.initializeEventListeners();
+window.onload = DOM.loadStorage;
