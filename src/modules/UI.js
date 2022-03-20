@@ -7,9 +7,8 @@ const $clearAll = document.querySelector("#clear-task");
 const tasksContainer = document.querySelector(".project-grid");
 const $firstAddButton = document.querySelector("#add-button");
 let defaultProject = new Project("Default");
-let completedTasks = new Project("Completed");
 
-class DOM {
+export default class DOM {
 	static loadStorage() {
 		for (let i = 0; i < localStorage.length; i++) {
 			const key = localStorage.key(i);
